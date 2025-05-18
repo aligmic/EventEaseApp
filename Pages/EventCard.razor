@@ -1,0 +1,32 @@
+@using EventEaseApp.Models
+
+@if (Event == null || string.IsNullOrWhiteSpace(Event.Name))
+{
+    <div class="alert alert-warning">Invalid event data.</div>
+}
+else
+{
+    <div class="card m-2 p-3">
+        <h3>@Event.Name</h3>
+        <p><strong>Date:</strong> @Event.Date.ToString("MMMM dd, yyyy")</p>
+        <p><strong>Location:</strong> @Event.Location</p>
+        <p><strong>Event ID:</strong> @Event.Id</p>
+        @if (Event.Id > 0)
+        {
+            <NavLink href="@($"eventdetails/{Event.Id}")">Details</NavLink>
+            <span class="mx-2">|</span>
+            <NavLink href="@($"/eventregistration/{Event.Id}")">Register</NavLink>
+        }
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Event Event { get; set; } = new Event
+    {
+        Id = 0,
+        Name = "Sample Event",
+        Date = DateTime.Now.AddDays(7),
+        Location = "Main Hall"
+    };
+}

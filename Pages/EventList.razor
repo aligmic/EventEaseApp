@@ -1,0 +1,37 @@
+@page "/eventlist"
+@using EventEaseApp.Models
+
+<h2 class="text-center my-4 text-primary">Upcoming Events</h2>
+
+@if (Events == null)
+{
+    <div class="d-flex justify-content-center my-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else if (Events.Count == 0)
+{
+    <div class="alert alert-warning text-center my-5">No events found.</div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        @foreach (var evt in Events)
+        {
+            <div class="col">
+                <EventCard Event="evt" />
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<Event> Events = new()
+    {
+        new Event { Id = 1, Name = "Tech Conference", Date = DateTime.Now.AddDays(10), Location = "Auditorium" },
+        new Event { Id = 2, Name = "Music Festival", Date = DateTime.Now.AddDays(20), Location = "City Park" },
+        new Event { Id = 3, Name = "Art Expo", Date = DateTime.Now.AddDays(30), Location = "Gallery Hall" }
+    };
+}

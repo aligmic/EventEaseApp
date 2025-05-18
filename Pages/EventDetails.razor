@@ -1,0 +1,71 @@
+@page "/eventdetails/{id:int}"
+@using EventEaseApp.Models
+@inject NavigationManager NavigationManager
+@inject EventEaseApp.Services.AttendanceService AttendanceService
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    Event? SelectedEvent { get; set; }
+    List<Event> Events { get; set; } = new();
+    List<AttendanceRecord> Attendees { get; set; } = new();
+
+    protected override void OnInitialized()
+    {
+        // Populate Events with mock data
+        Events = new List<Event>
+        {
+            new Event { Id = 1, Name = "Tech Conference", Date = DateTime.Now.AddDays(10), Location = "Auditorium" },
+            new Event { Id = 2, Name = "Music Festival", Date = DateTime.Now.AddDays(20), Location = "City Park" },
+            new Event { Id = 3, Name = "Art Expo", Date = DateTime.Now.AddDays(30), Location = "Gallery Hall" }
+        };
+
+        SelectedEvent = Events.FirstOrDefault(e => e.Id == id);
+        if (SelectedEvent != null)
+        {
+            // Load attendees for this event
+            Attendees = AttendanceService.GetAttendanceForEvent(SelectedEvent.Id).ToList();
+        }
+    }
+}
+
+@if (SelectedEvent is not null)
+{
+    <div class="card shadow-lg border-0 my-4 mx-auto" style="max-width: 500px;">
+        <div class="card-body">
+            <h2 class="card-title text-primary">@SelectedEvent.Name</h2>
+            <p class="mb-2"><span class="fw-bold">Date:</span> @SelectedEvent.Date.ToString("MMMM dd, yyyy")</p>
+            <p class="mb-2"><span class="fw-bold">Location:</span> @SelectedEvent.Location</p>
+            <NavLink class="btn btn-success mt-3" href="@($"/eventregistration/{SelectedEvent.Id}")">
+                <i class="bi bi-pencil-square"></i> Register
+            </NavLink>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mx-auto" style="max-width: 500px;">
+        <div class="card-body">
+            <h4 class="card-title">Attendees</h4>
+            @if (Attendees.Any())
+            {
+                <ul class="list-group list-group-flush">
+                    @foreach (var attendee in Attendees)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>@attendee.UserName</span>
+                            <span class="badge bg-secondary">@attendee.AttendedOn.ToShortDateString()</span>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <div class="alert alert-info mb-0">No attendees yet.</div>
+            }
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-danger mt-4">Event not found.</div>
+}

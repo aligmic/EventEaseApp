@@ -1,0 +1,63 @@
+@page "/eventregistration/{eventId:int?}"
+@using System.ComponentModel.DataAnnotations
+@inject EventEaseApp.Services.UserSessionState SessionState
+@inject EventEaseApp.Services.AttendanceService AttendanceService
+
+<h2>Event Registration</h2>
+
+<EditForm Model="@registrationModel" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <InputText id="name" class="form-control" @bind-Value="registrationModel.Name" />
+        <ValidationMessage For="@(() => registrationModel.Name)" />
+    </div>
+    <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <InputText id="email" class="form-control" @bind-Value="registrationModel.Email" />
+        <ValidationMessage For="@(() => registrationModel.Email)" />
+    </div>
+    <button type="submit" class="btn btn-primary">Register</button>
+</EditForm>
+
+@if (success)
+{
+    <div class="alert alert-success mt-3">
+        Registration successful! Welcome, @SessionState.UserName.
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int? eventId { get; set; }
+
+    private RegistrationModel registrationModel = new();
+    private bool success = false;
+
+    private void HandleValidSubmit()
+    {
+        // Update session state with registration info
+        SessionState.UserName = registrationModel.Name;
+        SessionState.RegisteredEventId = eventId;
+
+        // Mark attendance if eventId is available
+        if (eventId.HasValue && !string.IsNullOrWhiteSpace(registrationModel.Name))
+        {
+            AttendanceService.MarkAttendance(eventId.Value, registrationModel.Name);
+        }
+
+        success = true;
+    }
+
+    public class RegistrationModel
+    {
+        [Required(ErrorMessage = "Name is required")]
+        public string Name { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Invalid email address")]
+        public string Email { get; set; } = string.Empty;
+    }
+}
